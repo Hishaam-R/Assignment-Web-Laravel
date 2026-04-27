@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Barbershop API – Laravel Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --accent: #c9a84c;
+      --accent2: #e8c97a;
+      --text: #e8e4dc;
+      --muted: #888;
+      --green: #4caf82;
+      --red: #e05050;
+      --blue: #5b9cf6;
+      --purple: #a878e8;
+      --orange: #e8934c;
+      --tag-get: #1a3a2a;
+      --tag-get-text: #4cdb8f;
+      --tag-post: #1a2a3a;
+      --tag-post-text: #5bb0f6;
+      --tag-put: #2a2a1a;
+      --tag-put-text: #e8c84c;
+      --tag-del: #2a1a1a;
+      --tag-del-text: #e05050;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .logo span { color: var(--text); }
+    .badge {
+      background: var(--accent);
+      color: #000;
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 3px 10px;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ── LAYOUT ── */
+    .container { display: flex; min-height: calc(100vh - 64px); }
+
+    nav {
+      width: 260px;
+      min-width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+    nav::-webkit-scrollbar { width: 4px; }
+    nav::-webkit-scrollbar-track { background: transparent; }
+    nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .nav-group { margin-bottom: 6px; }
+    .nav-group-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 12px 24px 6px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 24px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 12px;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .nav-link:hover { background: rgba(201,168,76,0.06); border-left-color: var(--accent); color: var(--accent2); }
+
+    main { flex: 1; padding: 40px 56px; max-width: 900px; }
+
+    /* ── HERO ── */
+    .hero {
+      margin-bottom: 56px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .hero p { color: var(--muted); font-size: 14px; max-width: 600px; }
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .meta-value { font-size: 13px; color: var(--accent2); font-weight: 700; }
+
+    /* ── SECTIONS ── */
+    .section { margin-bottom: 64px; }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── ENDPOINT CARD ── */
+    .endpoint {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .endpoint-header:hover { background: rgba(255,255,255,0.02); }
+    .method {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 3px;
+      min-width: 52px;
+      text-align: center;
+    }
+    .method.GET  { background: var(--tag-get);  color: var(--tag-get-text); }
+    .method.POST { background: var(--tag-post); color: var(--tag-post-text); }
+    .method.PUT  { background: var(--tag-put);  color: var(--tag-put-text); }
+    .method.DELETE { background: var(--tag-del); color: var(--tag-del-text); }
+    .endpoint-path {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+      flex: 1;
+    }
+    .endpoint-desc {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'Syne', sans-serif;
+    }
+    .lock-icon { font-size: 10px; color: var(--accent); }
+
+    .endpoint-body {
+      border-top: 1px solid var(--border);
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .endpoint.open .endpoint-body { display: flex; }
+
+    /* ── REQUEST/RESPONSE PANELS ── */
+    .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .panel { }
+    .panel-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    pre {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11.5px;
+      overflow-x: auto;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    /* JSON syntax colors */
+    .k { color: var(--blue); }
+    .s { color: var(--green); }
+    .n { color: var(--orange); }
+    .b { color: var(--purple); }
+    .c { color: var(--muted); font-style: italic; }
+
+    /* ── PARAMS TABLE ── */
+    .params-table { width: 100%; border-collapse: collapse; }
+    .params-table th {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .params-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(42,42,42,0.5);
+      font-size: 12px;
+      vertical-align: top;
+    }
+    .params-table td:first-child { font-family: 'Space Mono', monospace; color: var(--accent2); font-size: 11px; }
+    .params-table td:nth-child(2) { color: var(--purple); }
+    .params-table .req { color: var(--red); font-size: 10px; }
+    .params-table .opt { color: var(--muted); font-size: 10px; }
+
+    /* ── AUTH SECTION ── */
+    .auth-box {
+      background: rgba(201,168,76,0.05);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 6px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .auth-box h3 {
+      font-family: 'Syne', sans-serif;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 20px 0;
+      overflow-x: auto;
+    }
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .flow-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 16px;
+      text-align: center;
+      font-size: 11px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+      min-width: 120px;
+    }
+    .flow-box.accent { border-color: var(--accent); color: var(--accent); }
+    .flow-arrow {
+      color: var(--muted);
+      font-size: 18px;
+      padding: 0 8px;
+      margin-bottom: 16px;
+    }
+    .flow-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ── OVERVIEW TABLE ── */
+    .overview-table { width: 100%; border-collapse: collapse; }
+    .overview-table th {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      padding: 8px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .overview-table tr:hover td { background: rgba(255,255,255,0.01); }
+    .overview-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(42,42,42,0.5);
+      font-size: 12px;
+    }
+    .overview-table td:nth-child(2) { font-family: 'Space Mono'; font-size: 11px; }
+
+    /* ── POSTMAN ── */
+    .postman-note {
+      background: rgba(91,156,246,0.05);
+      border: 1px solid rgba(91,156,246,0.2);
+      border-radius: 6px;
+      padding: 18px 22px;
+      margin-top: 16px;
+    }
+    .postman-note h4 { font-family: 'Syne', sans-serif; color: var(--blue); font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+
+    /* ── STATUS CHIPS ── */
+    .status { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: 10px; font-weight: 700; font-family: 'Syne', sans-serif; }
+    .s200 { background: rgba(76,175,130,0.15); color: var(--green); }
+    .s201 { background: rgba(76,175,130,0.15); color: var(--green); }
+    .s401 { background: rgba(232,147,76,0.15); color: var(--orange); }
+    .s422 { background: rgba(224,80,80,0.15); color: var(--red); }
+    .s403 { background: rgba(168,120,232,0.15); color: var(--purple); }
+
+    /* Accordion toggle */
+    .chevron { color: var(--muted); transition: transform 0.2s; font-size: 11px; margin-left: auto; }
+    .endpoint.open .chevron { transform: rotate(90deg); }
+
+    code {
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      padding: 1px 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11.5px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Ansar<span>Barber</span> · API</div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="color:var(--muted);font-size:11px;">Base URL:</span>
+    <code style="color:var(--accent2);">http://localhost:8000/api</code>
+    <div class="badge">Laravel</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- SIDEBAR NAV -->
+  <nav>
+    <div class="nav-group">
+      <div class="nav-group-label">Overview</div>
+      <a class="nav-link" href="#overview">📋 API Overview</a>
+      <a class="nav-link" href="#auth-flow">🔐 Authentication</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Public Booking</div>
+      <a class="nav-link" href="#public-shop">🏪 Shop Profile</a>
+      <a class="nav-link" href="#public-services">✂️ Services</a>
+      <a class="nav-link" href="#public-slots">📅 Available Slots</a>
+      <a class="nav-link" href="#public-monthly">📆 Monthly Availability</a>
+      <a class="nav-link" href="#public-book">📝 Book Appointment</a>
+      <a class="nav-link" href="#public-manage">🔧 Manage Booking</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Barber Panel</div>
+      <a class="nav-link" href="#barber-auth">🔑 Login / Logout</a>
+      <a class="nav-link" href="#barber-dashboard">📊 Dashboard</a>
+      <a class="nav-link" href="#barber-appointments">📋 Appointments</a>
+      <a class="nav-link" href="#barber-services">✂️ Services (CRUD)</a>
+      <a class="nav-link" href="#barber-availability">🗓️ Availability</a>
+      <a class="nav-link" href="#barber-blocked">🚫 Blocked Dates</a>
+      <a class="nav-link" href="#barber-customers">👥 Customers</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Admin Panel</div>
+      <a class="nav-link" href="#admin-auth">🔑 Login / Logout</a>
+      <a class="nav-link" href="#admin-users">👤 User Management</a>
+      <a class="nav-link" href="#admin-barbers">💈 Barbers</a>
+      <a class="nav-link" href="#admin-stats">📈 Stats & Logs</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- HERO -->
+    <div class="hero">
+      <h1>Barbershop<br/>REST API</h1>
+      <p>Laravel-powered REST API for the Ansar Barber appointment booking system. Supports public customer bookings, barber schedule management, and admin operations.</p>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-label">Framework</span>
+          <span class="meta-value">Laravel (PHP)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Auth Method</span>
+          <span class="meta-value">Session / Cookie</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Database</span>
+          <span class="meta-value">MariaDB</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Format</span>
+          <span class="meta-value">JSON</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── OVERVIEW ── -->
+    <div id="overview" class="section">
+      <div class="section-title">API Overview</div>
+      <p style="color:var(--muted);margin-bottom:20px;">
+        The API is divided into three access tiers. Public endpoints require no authentication. Barber and Admin endpoints use session-based authentication (cookie) with role enforcement via the <code>role:barber</code> and <code>role:super_admin</code> middleware.
+      </p>
+      <table class="overview-table">
+        <thead><tr><th>Tier</th><th>Prefix</th><th>Auth Required</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Public Booking</td><td>/api/...</td><td style="color:var(--green)">No</td><td style="color:var(--muted)">–</td></tr>
+          <tr><td>Barber Panel</td><td>/api/barber/...</td><td style="color:var(--red)">Yes</td><td style="color:var(--accent)">barber</td></tr>
+          <tr><td>Admin Panel</td><td>/api/admin/...</td><td style="color:var(--red)">Yes</td><td style="color:var(--purple)">super_admin</td></tr>
+        </tbody>
+      </table>
+
+      <div class="postman-note" style="margin-top:20px;">
+        <h4>🧪 Testing with Postman</h4>
+        <p style="color:var(--muted);">All endpoints can be tested with Postman or Advanced REST Client. For authenticated routes, you must first call the login endpoint, then include the session cookie in subsequent requests. In Postman, enable <strong style="color:var(--blue)">Cookies</strong> (or use the Cookie Manager) so the <code>laravel_session</code> cookie is sent automatically after login. Set header <code>Accept: application/json</code> and <code>X-Requested-With: XMLHttpRequest</code> on all requests to receive JSON error responses instead of HTML redirects.</p>
+      </div>
+    </div>
+
+    <!-- ── AUTH FLOW ── -->
+    <div id="auth-flow" class="section">
+      <div class="section-title">Authentication Flow</div>
+      <div class="auth-box">
+        <h3>Session-Based Authentication</h3>
+        <p style="color:var(--muted);">This API uses Laravel's session authentication (not token-based). After a successful <code>POST /api/barber/login</code> or <code>POST /api/admin/login</code>, the server issues a session cookie. All subsequent authenticated requests must include this cookie. CSRF tokens are handled via the <code>web</code> middleware group.</p>
+      </div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-box accent">Client</div>
+          <div class="flow-label">Postman / Frontend</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">POST /api/barber/login</div>
+          <div class="flow-label">email + password</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">Laravel Auth</div>
+          <div class="flow-label">Validates credentials</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box accent">Session Cookie</div>
+          <div class="flow-label">laravel_session</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">Protected Routes</div>
+          <div class="flow-label">auth + role middleware</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  PUBLIC BOOKING ENDPOINTS              -->
+    <!-- ═══════════════════════════════════════ -->
+
+    <div id="public-shop" class="section">
+      <div class="section-title">Shop Profile</div>
+
+      <!-- GET /shop-profile -->
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/shop-profile</span>
+          <span class="endpoint-desc">Returns shop name, phone, address, currency</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Sample Request (Postman)</div>
+            <pre>GET http://localhost:8000/api/shop-profile
+Accept: application/json</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: {
+    <span class="k">"name"</span>: <span class="s">"Exquisite Barber"</span>,
+    <span class="k">"phone"</span>: <span class="s">"+230 5768 2116"</span>,
+    <span class="k">"address"</span>: <span class="s">"Basgueet Road Brisee Verdiere"</span>,
+    <span class="k">"currency"</span>: <span class="s">"MUR"</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PUBLIC SERVICES -->
+    <div id="public-services" class="section">
+      <div class="section-title">Services (Public)</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/services</span>
+          <span class="endpoint-desc">List all active services available for booking</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Sample Request (Postman)</div>
+            <pre>GET http://localhost:8000/api/services
+Accept: application/json</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: [
+    {
+      <span class="k">"id"</span>: <span class="n">1</span>,
+      <span class="k">"name"</span>: <span class="s">"Haircut"</span>,
+      <span class="k">"duration_minutes"</span>: <span class="n">30</span>,
+      <span class="k">"price"</span>: <span class="s">"250.00"</span>,
+      <span class="k">"description"</span>: <span class="s">"Classic men's haircut"</span>,
+      <span class="k">"is_active"</span>: <span class="b">true</span>
+    },
+    {
+      <span class="k">"id"</span>: <span class="n">2</span>,
+      <span class="k">"name"</span>: <span class="s">"Shave"</span>,
+      <span class="k">"duration_minutes"</span>: <span class="n">20</span>,
+      <span class="k">"price"</span>: <span class="s">"150.00"</span>,
+      <span class="k">"is_active"</span>: <span class="b">true</span>
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVAILABLE SLOTS -->
+    <div id="public-slots" class="section">
+      <div class="section-title">Available Slots</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/available-slots</span>
+          <span class="endpoint-desc">Get open time slots for a barber on a given date</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Query Parameters</div>
+            <table class="params-table">
+              <thead><tr><th>Param</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>date</td><td>date</td><td><span class="req">required</span></td><td>YYYY-MM-DD, today or future</td></tr>
+                <tr><td>service_id</td><td>integer</td><td><span class="req">required</span></td><td>Must exist in services table</td></tr>
+                <tr><td>barber_id</td><td>integer</td><td><span class="opt">optional</span></td><td>Auto-resolves to first active barber if omitted</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Sample Request (Postman)</div>
+            <pre>GET http://localhost:8000/api/available-slots
+  ?date=2026-04-25
+  &service_id=1
+  &barber_id=2
+Accept: application/json</pre>
+          </div>
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: {
+    <span class="k">"barber_id"</span>: <span class="n">2</span>,
+    <span class="k">"date"</span>: <span class="s">"2026-04-25"</span>,
+    <span class="k">"slots"</span>: [
+      <span class="s">"09:00"</span>, <span class="s">"09:30"</span>, <span class="s">"10:00"</span>, <span class="s">"10:30"</span>,
+      <span class="s">"11:00"</span>, <span class="s">"14:00"</span>, <span class="s">"14:30"</span>, <span class="s">"15:00"</span>
+    ]
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MONTHLY AVAILABILITY -->
+    <div id="public-monthly" class="section">
+      <div class="section-title">Monthly Availability</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/monthly-availability</span>
+          <span class="endpoint-desc">Check which days in a month have at least one open slot</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Query Parameters</div>
+            <table class="params-table">
+              <thead><tr><th>Param</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>month</td><td>string</td><td><span class="req">required</span></td><td>Format: YYYY-MM</td></tr>
+                <tr><td>service_id</td><td>integer</td><td><span class="req">required</span></td><td>Used for slot duration calculation</td></tr>
+                <tr><td>barber_id</td><td>integer</td><td><span class="opt">optional</span></td><td>Auto-resolves if omitted</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: {
+    <span class="k">"barber_id"</span>: <span class="n">2</span>,
+    <span class="k">"month"</span>: <span class="s">"2026-04"</span>,
+    <span class="k">"days"</span>: {
+      <span class="k">"2026-04-22"</span>: <span class="b">true</span>,
+      <span class="k">"2026-04-23"</span>: <span class="b">true</span>,
+      <span class="k">"2026-04-24"</span>: <span class="b">false</span>,
+      <span class="k">"2026-04-25"</span>: <span class="b">true</span>
+    }
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOK APPOINTMENT -->
+    <div id="public-book" class="section">
+      <div class="section-title">Book Appointment</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/book-appointment</span>
+          <span class="endpoint-desc">Create a new appointment — no login required</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body (JSON)</div>
+            <table class="params-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>full_name</td><td>string</td><td><span class="req">required</span></td><td>Customer name</td></tr>
+                <tr><td>phone</td><td>string</td><td><span class="req">required</span></td><td>Used to identify customer</td></tr>
+                <tr><td>email</td><td>string</td><td><span class="opt">optional</span></td><td>Customer email</td></tr>
+                <tr><td>service_id</td><td>integer</td><td><span class="req">required</span></td><td>Must exist and be active</td></tr>
+                <tr><td>barber_id</td><td>integer</td><td><span class="req">required</span></td><td>Must be an active barber</td></tr>
+                <tr><td>appointment_date</td><td>date</td><td><span class="req">required</span></td><td>Today or future</td></tr>
+                <tr><td>start_time</td><td>string</td><td><span class="req">required</span></td><td>Format: HH:MM</td></tr>
+                <tr><td>notes</td><td>string</td><td><span class="opt">optional</span></td><td>Customer notes</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Sample Postman Request Body</div>
+            <pre>{
+  <span class="k">"full_name"</span>: <span class="s">"John Doe"</span>,
+  <span class="k">"phone"</span>: <span class="s">"+230 5000 1234"</span>,
+  <span class="k">"email"</span>: <span class="s">"john@example.com"</span>,
+  <span class="k">"service_id"</span>: <span class="n">1</span>,
+  <span class="k">"barber_id"</span>: <span class="n">2</span>,
+  <span class="k">"appointment_date"</span>: <span class="s">"2026-04-25"</span>,
+  <span class="k">"start_time"</span>: <span class="s">"10:00"</span>,
+  <span class="k">"notes"</span>: <span class="s">"Low fade please"</span>
+}</pre>
+          </div>
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s201">201 Created</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"Appointment booked successfully."</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="n">42</span>,
+    <span class="k">"booking_code"</span>: <span class="s">"BK-A3X9F"</span>,
+    <span class="k">"appointment_date"</span>: <span class="s">"2026-04-25"</span>,
+    <span class="k">"start_time"</span>: <span class="s">"10:00:00"</span>,
+    <span class="k">"end_time"</span>: <span class="s">"10:30:00"</span>,
+    <span class="k">"status"</span>: <span class="s">"confirmed"</span>,
+    <span class="k">"customer"</span>: { <span class="k">"name"</span>: <span class="s">"John Doe"</span>, <span class="k">"phone"</span>: <span class="s">"+230 5000 1234"</span> },
+    <span class="k">"service"</span>: { <span class="k">"name"</span>: <span class="s">"Haircut"</span>, <span class="k">"duration_minutes"</span>: <span class="n">30</span> }
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANAGE BOOKING -->
+    <div id="public-manage" class="section">
+      <div class="section-title">Manage Booking (by Booking Code)</div>
+      <p style="color:var(--muted);margin-bottom:16px;">Customers use their booking code + phone number to view, cancel, or reschedule without logging in.</p>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/appointment/{bookingCode}</span>
+          <span class="endpoint-desc">View appointment details + cancellation policy</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Query Parameters</div>
+            <table class="params-table">
+              <thead><tr><th>Param</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>phone</td><td>string</td><td>Must match the customer's phone on the booking</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: {
+    <span class="k">"booking_code"</span>: <span class="s">"BK-A3X9F"</span>,
+    <span class="k">"status"</span>: <span class="s">"confirmed"</span>,
+    <span class="k">"can_cancel"</span>: <span class="b">true</span>,
+    <span class="k">"cancellation_window_hours"</span>: <span class="n">2</span>,
+    <span class="k">"cancellation_deadline"</span>: <span class="s">"2026-04-25T08:00:00+04:00"</span>,
+    <span class="k">"cancellation_notice"</span>: <span class="s">"You can cancel up to 2 hours before"</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/appointment/{bookingCode}/cancel</span>
+          <span class="endpoint-desc">Cancel an appointment within the cancellation window</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{ <span class="k">"phone"</span>: <span class="s">"+230 5000 1234"</span> }</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{ <span class="k">"message"</span>: <span class="s">"Appointment cancelled successfully."</span> }</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/appointment/{bookingCode}/reschedule</span>
+          <span class="endpoint-desc">Move booking to a new date/time (max 3 reschedules)</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{
+  <span class="k">"phone"</span>: <span class="s">"+230 5000 1234"</span>,
+  <span class="k">"appointment_date"</span>: <span class="s">"2026-04-28"</span>,
+  <span class="k">"start_time"</span>: <span class="s">"11:00"</span>
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"Appointment rescheduled successfully."</span>,
+  <span class="k">"data"</span>: { <span class="c">/* updated appointment */</span> }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  BARBER PANEL                          -->
+    <!-- ═══════════════════════════════════════ -->
+
+    <div id="barber-auth" class="section">
+      <div class="section-title">Barber Authentication</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/barber/login</span>
+          <span class="endpoint-desc">Authenticate as barber — returns session cookie</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{
+  <span class="k">"email"</span>: <span class="s">"barber@shop.com"</span>,
+  <span class="k">"password"</span>: <span class="s">"password123"</span>
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"Login successful."</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="n">2</span>,
+    <span class="k">"name"</span>: <span class="s">"Ansar"</span>,
+    <span class="k">"email"</span>: <span class="s">"barber@shop.com"</span>,
+    <span class="k">"role"</span>: <span class="s">"barber"</span>
+  }
+}
+<span class="c">// laravel_session cookie set automatically</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/barber/logout</span>
+          <span class="endpoint-desc">Invalidate the current session</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{ <span class="k">"message"</span>: <span class="s">"Logged out successfully."</span> }</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARBER DASHBOARD -->
+    <div id="barber-dashboard" class="section">
+      <div class="section-title">Barber Dashboard</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/barber/dashboard</span>
+          <span class="endpoint-desc">Today's schedule, upcoming appointments, stats</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: {
+    <span class="k">"today_appointments"</span>: [
+      {
+        <span class="k">"id"</span>: <span class="n">42</span>,
+        <span class="k">"start_time"</span>: <span class="s">"09:00:00"</span>,
+        <span class="k">"status"</span>: <span class="s">"confirmed"</span>,
+        <span class="k">"customer"</span>: { <span class="k">"name"</span>: <span class="s">"John Doe"</span> },
+        <span class="k">"service"</span>: { <span class="k">"name"</span>: <span class="s">"Haircut"</span>, <span class="k">"duration_minutes"</span>: <span class="n">30</span> }
+      }
+    ],
+    <span class="k">"upcoming_appointments"</span>: [ <span class="c">/* next 10 */</span> ],
+    <span class="k">"stats"</span>: {
+      <span class="k">"total_appointments"</span>: <span class="n">128</span>,
+      <span class="k">"completed_appointments"</span>: <span class="n">110</span>,
+      <span class="k">"cancelled_appointments"</span>: <span class="n">8</span>
+    }
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARBER APPOINTMENTS -->
+    <div id="barber-appointments" class="section">
+      <div class="section-title">Barber Appointments</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/barber/appointments</span>
+          <span class="endpoint-desc">Paginated list with optional filters</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Optional Query Params</div>
+            <table class="params-table">
+              <thead><tr><th>Param</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>date</td><td>Filter by exact date (YYYY-MM-DD)</td></tr>
+                <tr><td>start_date</td><td>Filter from date</td></tr>
+                <tr><td>end_date</td><td>Filter until date</td></tr>
+                <tr><td>status</td><td>pending / confirmed / completed / cancelled</td></tr>
+                <tr><td>customer</td><td>Search by name or phone</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Sample Request</div>
+            <pre>GET /api/barber/appointments
+  ?status=confirmed
+  &start_date=2026-04-01
+  &end_date=2026-04-30</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/barber/appointments/{appointment}</span>
+          <span class="endpoint-desc">Update appointment status, notes</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{
+  <span class="k">"status"</span>: <span class="s">"completed"</span>,
+  <span class="k">"notes"</span>: <span class="s">"Customer was on time"</span>
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"Appointment updated."</span>,
+  <span class="k">"data"</span>: { <span class="c">/* fresh appointment with relations */</span> }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARBER SERVICES (CRUD) -->
+    <div id="barber-services" class="section">
+      <div class="section-title">Services Management (Barber CRUD)</div>
+      <p style="color:var(--muted);margin-bottom:16px;">Full CRUD via Laravel's <code>apiResource</code>. All routes require <code>role:barber</code> session.</p>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/barber/services</span>
+          <span class="endpoint-desc">List all services (incl. inactive)</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{ <span class="k">"data"</span>: [ <span class="c">/* array of all services ordered by name */</span> ] }</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/barber/services</span>
+          <span class="endpoint-desc">Create a new service</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{
+  <span class="k">"name"</span>: <span class="s">"Beard Trim"</span>,
+  <span class="k">"duration_minutes"</span>: <span class="n">20</span>,
+  <span class="k">"price"</span>: <span class="n">120</span>,
+  <span class="k">"description"</span>: <span class="s">"Full beard shaping"</span>,
+  <span class="k">"is_active"</span>: <span class="b">true</span>
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Validation Rules</div>
+            <table class="params-table">
+              <thead><tr><th>Field</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td>name</td><td>required, string, max:255</td></tr>
+                <tr><td>duration_minutes</td><td>required, integer, min:10, max:240</td></tr>
+                <tr><td>price</td><td>required, numeric, min:0</td></tr>
+                <tr><td>is_active</td><td>required, boolean</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/barber/services/{service}</span>
+          <span class="endpoint-desc">Update a service (partial updates supported)</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <pre>{ <span class="k">"price"</span>: <span class="n">275</span>, <span class="k">"is_active"</span>: <span class="b">false</span> }
+<span class="c">// Only send fields you want to change</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method DELETE">DELETE</span>
+          <span class="endpoint-path">/api/barber/services/{service}</span>
+          <span class="endpoint-desc">Delete service (blocked if linked to appointments)</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Success Response <span class="status s200">200</span></div>
+            <pre>{ <span class="k">"message"</span>: <span class="s">"Service deleted."</span> }</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Error Response <span class="status s422">422</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"Service cannot be deleted because
+  it is linked to appointments."</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARBER AVAILABILITY -->
+    <div id="barber-availability" class="section">
+      <div class="section-title">Availability Rules</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/barber/availability</span>
+          <span class="endpoint-desc">Get weekly schedule rules for the authenticated barber</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: [
+    {
+      <span class="k">"id"</span>: <span class="n">1</span>,
+      <span class="k">"barber_id"</span>: <span class="n">2</span>,
+      <span class="k">"day_of_week"</span>: <span class="n">1</span>,   <span class="c">// 0=Sun, 1=Mon, ..., 6=Sat</span>
+      <span class="k">"start_time"</span>: <span class="s">"09:00:00"</span>,
+      <span class="k">"end_time"</span>: <span class="s">"17:00:00"</span>,
+      <span class="k">"is_available"</span>: <span class="b">true</span>
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/barber/availability</span>
+          <span class="endpoint-desc">Set/update a day's availability rule (upsert)</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{
+  <span class="k">"day_of_week"</span>: <span class="n">1</span>,
+  <span class="k">"start_time"</span>: <span class="s">"09:00"</span>,
+  <span class="k">"end_time"</span>: <span class="s">"17:00"</span>,
+  <span class="k">"is_available"</span>: <span class="b">true</span>
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Notes</div>
+            <p style="color:var(--muted);font-size:12px;">Uses <code>updateOrCreate</code> — if a rule for that <code>day_of_week</code> already exists, it is updated. Otherwise a new rule is created. Returns <code>201</code> in both cases.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCKED DATES -->
+    <div id="barber-blocked" class="section">
+      <div class="section-title">Blocked Dates / Exceptions</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/barber/blocked-dates</span>
+          <span class="endpoint-desc">Block a full day or specific time range</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{
+  <span class="k">"date"</span>: <span class="s">"2026-05-01"</span>,
+  <span class="k">"start_time"</span>: <span class="s">"12:00"</span>,  <span class="c">// optional</span>
+  <span class="k">"end_time"</span>: <span class="s">"14:00"</span>,    <span class="c">// optional</span>
+  <span class="k">"reason"</span>: <span class="s">"Lunch break"</span>  <span class="c">// optional</span>
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s201">201 Created</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"Blocked date saved."</span>,
+  <span class="k">"data"</span>: { <span class="c">/* exception record */</span> }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method DELETE">DELETE</span>
+          <span class="endpoint-path">/api/barber/blocked-dates/{blockedDate}</span>
+          <span class="endpoint-desc">Remove a blocked date exception</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <pre>{ <span class="k">"message"</span>: <span class="s">"Blocked date removed."</span> }</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div id="barber-customers" class="section">
+      <div class="section-title">Customers</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/barber/customers</span>
+          <span class="endpoint-desc">Paginated list of the barber's customers, sorted by visit count</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: {
+    <span class="k">"data"</span>: [
+      {
+        <span class="k">"id"</span>: <span class="n">5</span>,
+        <span class="k">"name"</span>: <span class="s">"John Doe"</span>,
+        <span class="k">"phone"</span>: <span class="s">"+230 5000 1234"</span>,
+        <span class="k">"total_visits"</span>: <span class="n">7</span>,
+        <span class="k">"last_visit"</span>: <span class="s">"2026-04-20T08:00:00.000000Z"</span>,
+        <span class="k">"appointments_count"</span>: <span class="n">7</span>
+      }
+    ],
+    <span class="k">"per_page"</span>: <span class="n">20</span>,
+    <span class="k">"current_page"</span>: <span class="n">1</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  ADMIN PANEL                           -->
+    <!-- ═══════════════════════════════════════ -->
+
+    <div id="admin-auth" class="section">
+      <div class="section-title">Admin Authentication</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/admin/login</span>
+          <span class="endpoint-desc">Authenticate as super_admin</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{
+  <span class="k">"email"</span>: <span class="s">"admin@shop.com"</span>,
+  <span class="k">"password"</span>: <span class="s">"adminpass"</span>
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"Login successful."</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="n">1</span>,
+    <span class="k">"name"</span>: <span class="s">"Admin"</span>,
+    <span class="k">"role"</span>: <span class="s">"super_admin"</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN USERS -->
+    <div id="admin-users" class="section">
+      <div class="section-title">User Management (Admin)</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/admin/users</span>
+          <span class="endpoint-desc">List all users, optionally filtered by role</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <pre>GET /api/admin/users?role=barber
+<span class="c">// role param: barber | super_admin</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/admin/users</span>
+          <span class="endpoint-desc">Create a new user (barber or admin)</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Request Body</div>
+            <pre>{
+  <span class="k">"name"</span>: <span class="s">"New Barber"</span>,
+  <span class="k">"email"</span>: <span class="s">"newbarber@shop.com"</span>,
+  <span class="k">"password"</span>: <span class="s">"secure123"</span>,
+  <span class="k">"role"</span>: <span class="s">"barber"</span>,
+  <span class="k">"phone"</span>: <span class="s">"+230 5123 4567"</span>,
+  <span class="k">"is_active"</span>: <span class="b">true</span>
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s201">201 Created</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"User created."</span>,
+  <span class="k">"data"</span>: { <span class="c">/* new user (password hashed) */</span> }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/admin/users/{user}</span>
+          <span class="endpoint-desc">Update user profile, role, or password</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <pre><span class="c">// All fields are optional (partial update)</span>
+{
+  <span class="k">"name"</span>: <span class="s">"Updated Name"</span>,
+  <span class="k">"password"</span>: <span class="s">"newpassword"</span>,  <span class="c">// set to null to keep current</span>
+  <span class="k">"is_active"</span>: <span class="b">false</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method DELETE">DELETE</span>
+          <span class="endpoint-path">/api/admin/users/{user}</span>
+          <span class="endpoint-desc">Delete a user account</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <pre>{ <span class="k">"message"</span>: <span class="s">"User deleted."</span> }</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN BARBERS -->
+    <div id="admin-barbers" class="section">
+      <div class="section-title">Barber Management (Admin)</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/admin/barbers</span>
+          <span class="endpoint-desc">List all barber accounts with active status</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <pre>{ <span class="k">"data"</span>: [ <span class="c">/* all users with role=barber */</span> ] }</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/admin/barbers/{barber}/toggle-status</span>
+          <span class="endpoint-desc">Enable or disable a barber account</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"message"</span>: <span class="s">"Barber status updated."</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="n">2</span>,
+    <span class="k">"name"</span>: <span class="s">"Ansar"</span>,
+    <span class="k">"is_active"</span>: <span class="b">false</span>  <span class="c">// toggled</span>
+  }
+}</pre>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Error <span class="status s422">422</span></div>
+            <pre>{ <span class="k">"message"</span>: <span class="s">"User is not a barber account."</span> }</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN STATS & LOGS -->
+    <div id="admin-stats" class="section">
+      <div class="section-title">Stats & Activity Logs</div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/admin/stats</span>
+          <span class="endpoint-desc">System-wide statistics snapshot</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: {
+    <span class="k">"users_total"</span>: <span class="n">5</span>,
+    <span class="k">"barbers_total"</span>: <span class="n">3</span>,
+    <span class="k">"customers_total"</span>: <span class="n">84</span>,
+    <span class="k">"services_total"</span>: <span class="n">6</span>,
+    <span class="k">"appointments_total"</span>: <span class="n">312</span>,
+    <span class="k">"appointments_completed"</span>: <span class="n">280</span>,
+    <span class="k">"appointments_cancelled"</span>: <span class="n">22</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint" onclick="toggle(this)">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/admin/logs</span>
+          <span class="endpoint-desc">Paginated appointment change log (last 50 per page)</span>
+          <span class="lock-icon">🔒</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-label">Response <span class="status s200">200 OK</span></div>
+            <pre>{
+  <span class="k">"data"</span>: {
+    <span class="k">"data"</span>: [
+      {
+        <span class="k">"id"</span>: <span class="n">88</span>,
+        <span class="k">"action"</span>: <span class="s">"cancelled"</span>,
+        <span class="k">"meta"</span>: { <span class="k">"channel"</span>: <span class="s">"public_booking"</span> },
+        <span class="k">"created_at"</span>: <span class="s">"2026-04-20T10:30:00.000000Z"</span>,
+        <span class="k">"appointment"</span>: { <span class="c">/* appointment data */</span> },
+        <span class="k">"actor"</span>: <span class="b">null</span>  <span class="c">// null for public actions</span>
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER SPACER -->
+    <div style="height:60px;"></div>
+
+  </main>
+</div>
+
+<script>
+  function toggle(el) {
+    el.classList.toggle('open');
+  }
+  // Auto-open all panels for initial load readability
+  // Remove this if you want collapsed by default
+</script>
+
+</body>
+</html>
